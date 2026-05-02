@@ -58,29 +58,27 @@ export default function UpdateProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    if (!formData.name.trim()) {
-      showError("Name cannot be empty");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!formData.image.trim()) {
-      showError("Image URL cannot be empty");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Simulate API call
-    setTimeout(() => {
-      updateProfile({
+    try {
+      if (!formData.name.trim()) {
+        showError("Name cannot be empty");
+        setIsSubmitting(false);
+        return;
+      }
+      if (!formData.image.trim()) {
+        showError("Image URL cannot be empty");
+        setIsSubmitting(false);
+        return;
+      }
+      await updateProfile({
         name: formData.name,
         image: formData.image,
       });
       showSuccess("Profile updated successfully!");
       router.push("/profile");
-      setIsSubmitting(false);
-    }, 1000);
+    } catch (err) {
+      showError(err?.message || "Profile update failed");
+    }
+    setIsSubmitting(false);
   };
 
   return (

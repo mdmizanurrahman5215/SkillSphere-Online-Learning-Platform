@@ -25,8 +25,8 @@ export default function ProfilePage() {
     return null;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 
@@ -56,14 +56,14 @@ export default function ProfilePage() {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           {/* Header Background */}
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-blue-800"></div>
+          <div className="h-32 bg-linear-to-r from-blue-600 to-blue-800"></div>
 
           {/* Profile Content */}
           <div className="px-6 py-8">
             <div className="flex flex-col md:flex-row gap-8 items-start">
               {/* Avatar */}
               <motion.div
-                className="flex-shrink-0"
+                className="shrink-0"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <motion.div
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full"
+                    className="bg-linear-to-r from-blue-500 to-blue-600 h-3 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${course.progress}%` }}
                     transition={{ duration: 1, delay: 1 + index * 0.1 }}

@@ -31,24 +31,19 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        const userData = {
-          id: Date.now(),
-          email: formData.email,
-          name: formData.email.split("@")[0],
-          image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.email}`,
-        };
-        login(userData);
-        showSuccess("Login successful!");
-        router.push(redirect);
-      } else {
+    try {
+      if (!formData.email || !formData.password) {
         showError("Please fill all fields");
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
-    }, 1000);
+      await login({ email: formData.email, password: formData.password });
+      showSuccess("Login successful!");
+      router.push(redirect);
+    } catch (err) {
+      showError(err?.message || "Login failed");
+    }
+    setIsLoading(false);
   };
 
   return (

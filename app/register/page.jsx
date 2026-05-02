@@ -9,7 +9,7 @@ import { showSuccess, showError } from "@/utils/toast";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -31,41 +31,37 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      showError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      showError("Password must be at least 6 characters");
-      setIsLoading(false);
-      return;
-    }
-
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.name && formData.email && formData.password) {
-        const userData = {
-          id: Date.now(),
-          email: formData.email,
-          name: formData.name,
-          image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.email}`,
-        };
-        login(userData);
-        showSuccess("Registration successful!");
-        router.push("/");
-      } else {
-        showError("Please fill all fields");
+    try {
+      if (formData.password !== formData.confirmPassword) {
+        showError("Passwords do not match");
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
-    }, 1000);
+      if (formData.password.length < 6) {
+        showError("Password must be at least 6 characters");
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.name || !formData.email || !formData.password) {
+        showError("Please fill all fields");
+        setIsLoading(false);
+        return;
+      }
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      showSuccess("Registration successful!");
+      router.push("/");
+    } catch (err) {
+      showError(err?.message || "Registration failed");
+    }
+    setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
       <motion.div
         className="w-full max-w-md"
         initial={{ opacity: 0, scale: 0.9 }}
@@ -163,7 +159,7 @@ export default function RegisterPage() {
             <motion.button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-900 transition disabled:opacity-50"
+              className="w-full py-3 bg-linear-to-r from-blue-600 to-blue-800 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-900 transition disabled:opacity-50"
               whileHover={!isLoading ? { scale: 1.02 } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
               initial={{ opacity: 0, y: 10 }}
