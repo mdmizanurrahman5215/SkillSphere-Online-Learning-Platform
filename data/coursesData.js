@@ -13,6 +13,8 @@ export const coursesData = [
     category: "Development",
     students: 5420,
     price: 99.99,
+    isTrending: true,
+    isNew: false,
   },
   {
     id: 2,
@@ -28,6 +30,8 @@ export const coursesData = [
     category: "Development",
     students: 3850,
     price: 89.99,
+    isTrending: true,
+    isNew: false,
   },
   {
     id: 3,
@@ -43,6 +47,8 @@ export const coursesData = [
     category: "Design",
     students: 4200,
     price: 79.99,
+    isTrending: false,
+    isNew: false,
   },
   {
     id: 4,
@@ -58,6 +64,8 @@ export const coursesData = [
     category: "Data Science",
     students: 6100,
     price: 109.99,
+    isTrending: true,
+    isNew: false,
   },
   {
     id: 5,
@@ -73,6 +81,8 @@ export const coursesData = [
     category: "Marketing",
     students: 2980,
     price: 69.99,
+    isTrending: false,
+    isNew: true,
   },
   {
     id: 6,
@@ -88,6 +98,8 @@ export const coursesData = [
     category: "Development",
     students: 4750,
     price: 119.99,
+    isTrending: true,
+    isNew: true,
   },
   {
     id: 7,
@@ -103,6 +115,8 @@ export const coursesData = [
     category: "Development",
     students: 3420,
     price: 99.99,
+    isTrending: false,
+    isNew: true,
   },
   {
     id: 8,
@@ -118,6 +132,8 @@ export const coursesData = [
     category: "Cloud",
     students: 2650,
     price: 139.99,
+    isTrending: true,
+    isNew: false,
   },
   {
     id: 9,
@@ -133,6 +149,8 @@ export const coursesData = [
     category: "Creative",
     students: 3890,
     price: 79.99,
+    isTrending: false,
+    isNew: true,
   },
   {
     id: 10,
@@ -147,6 +165,8 @@ export const coursesData = [
     category: "DevOps",
     students: 2320,
     price: 129.99,
+    isTrending: true,
+    isNew: false,
   },
 ];
 

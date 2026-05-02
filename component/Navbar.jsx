@@ -2,22 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { motion } from "framer-motion";
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, isLoggedIn, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Mock user data - replace with actual auth context/state management
-  const user = {
-    name: "John Doe",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-  };
-
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    logout();
     setIsDropdownOpen(false);
-    // Add actual logout logic here
   };
 
   const toggleMobileMenu = () => {
@@ -53,67 +48,79 @@ export default function Navbar() {
             >
               Courses
             </Link>
-            <Link
-              href="/profile"
-              className="hover:text-blue-200 transition duration-300 font-medium"
-            >
-              My Profile
-            </Link>
+            {isLoggedIn && (
+              <Link
+                href="/profile"
+                className="hover:text-blue-200 transition duration-300 font-medium"
+              >
+                My Profile
+              </Link>
+            )}
           </div>
 
           {/* Right side - Auth buttons/User menu */}
           <div className="flex items-center gap-4">
-            {isLoggedIn ? (
+            {isLoggedIn && user ? (
               <div className="relative">
-                <button
+                <motion.button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-2 hover:bg-blue-700 px-3 py-2 rounded-lg transition"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <img
-                    src={user.avatar}
+                    src={user.image}
                     alt={user.name}
-                    className="w-8 h-8 rounded-full border-2 border-white"
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
                   />
                   <span className="hidden sm:inline text-sm font-medium">
                     {user.name}
                   </span>
-                </button>
+                </motion.button>
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-xl z-50">
+                  <motion.div
+                    className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-xl z-50"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <Link
                       href="/profile"
                       className="block px-4 py-2 hover:bg-gray-100 rounded-t-lg transition"
                     >
-                      My Profile
+                      👤 My Profile
                     </Link>
                     <Link
-                      href="/settings"
+                      href="/profile/update"
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                     >
-                      Settings
+                      ✏️ Update Profile
                     </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 rounded-b-lg transition font-medium"
                     >
-                      Logout
+                      🚪 Logout
                     </button>
-                  </div>
+                  </motion.div>
                 )}
               </div>
             ) : (
               <div className="hidden md:flex gap-3">
-                <button
-                  onClick={() => setIsLoggedIn(true)}
+                <Link
+                  href="/login"
                   className="px-4 py-2 rounded-lg bg-white text-blue-600 font-semibold hover:bg-blue-50 transition"
                 >
                   Login
-                </button>
-                <button className="px-4 py-2 rounded-lg border-2 border-white text-white font-semibold hover:bg-blue-700 transition">
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-lg border-2 border-white text-white font-semibold hover:bg-blue-700 transition"
+                >
                   Register
-                </button>
+                </Link>
               </div>
             )}
 

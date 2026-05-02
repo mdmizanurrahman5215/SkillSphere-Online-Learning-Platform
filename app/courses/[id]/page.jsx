@@ -1,18 +1,109 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { coursesData } from "@/data/coursesData";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { motion } from "framer-motion";
+import Loader from "@/component/Loader";
+import { showSuccess, showError } from "@/utils/toast";
+
+// Curriculum data
+const curriculumData = {
+  1: [
+    { id: 1, title: "HTML Fundamentals", duration: "2 hours", videoCount: 12 },
+    {
+      id: 2,
+      title: "CSS & Responsive Design",
+      duration: "3 hours",
+      videoCount: 15,
+    },
+    { id: 3, title: "JavaScript Basics", duration: "4 hours", videoCount: 18 },
+    {
+      id: 4,
+      title: "Advanced JavaScript",
+      duration: "5 hours",
+      videoCount: 20,
+    },
+  ],
+  2: [
+    {
+      id: 1,
+      title: "React Hooks Deep Dive",
+      duration: "3 hours",
+      videoCount: 14,
+    },
+    { id: 2, title: "State Management", duration: "4 hours", videoCount: 16 },
+    {
+      id: 3,
+      title: "Performance Optimization",
+      duration: "3 hours",
+      videoCount: 12,
+    },
+    {
+      id: 4,
+      title: "Real-world Patterns",
+      duration: "5 hours",
+      videoCount: 18,
+    },
+  ],
+  3: [
+    { id: 1, title: "Design Principles", duration: "2 hours", videoCount: 10 },
+    {
+      id: 2,
+      title: "Typography & Colors",
+      duration: "3 hours",
+      videoCount: 14,
+    },
+    {
+      id: 3,
+      title: "Wireframing & Prototyping",
+      duration: "4 hours",
+      videoCount: 16,
+    },
+    {
+      id: 4,
+      title: "User Research & Testing",
+      duration: "3 hours",
+      videoCount: 12,
+    },
+  ],
+};
 
 export default function CourseDetail() {
   const params = useParams();
+  const router = useRouter();
+  const { user, isLoggedIn, loading } = useAuth();
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
   const courseId = parseInt(params.id, 10);
   const course = coursesData.find((c) => c.id === courseId);
+
+  // Check auth status
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      showError("Please log in to view this course");
+      router.push(`/login?redirect=/courses/${courseId}`);
+    }
+  }, [isLoggedIn, loading, courseId, router]);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (!isLoggedIn) {
+    return null;
+  }
 
   if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
           <div className="text-6xl mb-4">😕</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Course Not Found
@@ -23,14 +114,26 @@ export default function CourseDetail() {
           >
             Back to Courses
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
+  const curriculum = curriculumData[courseId] || [];
+
+  const handleEnroll = () => {
+    setIsEnrolled(true);
+    showSuccess("Successfully enrolled in the course!");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
+      {/* Breadcrumb */}
+      <motion.div
+        className="bg-white border-b"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-2 text-sm">
             <Link href="/" className="text-blue-600 hover:underline">
@@ -44,9 +147,15 @@ export default function CourseDetail() {
             <span className="text-gray-900 font-semibold">{course.title}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+      {/* Hero Section */}
+      <motion.div
+        className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="md:col-span-2">
@@ -57,7 +166,7 @@ export default function CourseDetail() {
                 {course.title}
               </h1>
               <p className="text-lg text-blue-100 mb-6">{course.description}</p>
-              <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-6 text-sm flex-wrap">
                 <div>
                   <p className="text-blue-100">Instructor</p>
                   <p className="font-bold text-lg">{course.instructor}</p>
@@ -72,7 +181,12 @@ export default function CourseDetail() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-4">
+            <motion.div
+              className="flex flex-col gap-4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <img
                 src={course.image}
                 alt={course.title}
@@ -83,22 +197,44 @@ export default function CourseDetail() {
                 <p className="text-4xl font-bold text-blue-600 mb-4">
                   ${course.price}
                 </p>
-                <button className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-900 transition transform hover:scale-105 mb-3">
-                  Enroll Now
-                </button>
-                <button className="w-full px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition">
-                  Add to Wishlist
-                </button>
+                <motion.button
+                  onClick={handleEnroll}
+                  disabled={isEnrolled}
+                  className={`w-full px-6 py-3 rounded-lg font-bold transition transform hover:scale-105 mb-3 ${
+                    isEnrolled
+                      ? "bg-green-500 text-white"
+                      : "bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:from-blue-700 hover:to-blue-900"
+                  }`}
+                  whileHover={!isEnrolled ? { scale: 1.05 } : {}}
+                  whileTap={!isEnrolled ? { scale: 0.95 } : {}}
+                >
+                  {isEnrolled ? "✓ Enrolled" : "Enroll Now"}
+                </motion.button>
+                <motion.button
+                  className="w-full px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ♡ Add to Wishlist
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
+      {/* Content Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Course Overview */}
+            <motion.div
+              className="bg-white rounded-xl shadow-lg p-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
                 Course Overview
               </h2>
@@ -108,7 +244,7 @@ export default function CourseDetail() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Students Enrolled</p>
+                  <p className="text-sm text-gray-600">Students</p>
                   <p className="text-2xl font-bold text-blue-600">
                     {(course.students / 1000).toFixed(1)}K
                   </p>
@@ -132,69 +268,126 @@ export default function CourseDetail() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            {/* What You'll Learn */}
+            <motion.div
+              className="bg-white rounded-xl shadow-lg p-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
                 What You'll Learn
               </h2>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 font-bold text-xl">✓</span>
-                  <span className="text-gray-600">
-                    Comprehensive understanding of core concepts
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 font-bold text-xl">✓</span>
-                  <span className="text-gray-600">
-                    Hands-on practice with real-world projects
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 font-bold text-xl">✓</span>
-                  <span className="text-gray-600">
-                    Industry best practices and standards
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 font-bold text-xl">✓</span>
-                  <span className="text-gray-600">
-                    Certification upon course completion
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 font-bold text-xl">✓</span>
-                  <span className="text-gray-600">
-                    Lifetime access to course materials
-                  </span>
-                </li>
-              </ul>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  "Comprehensive understanding of core concepts",
+                  "Hands-on practice with real-world projects",
+                  "Industry best practices and standards",
+                  "Certification upon course completion",
+                  "Lifetime access to course materials",
+                  "Community support and networking",
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex items-start gap-3"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                  >
+                    <span className="text-green-500 font-bold text-xl flex-shrink-0">
+                      ✓
+                    </span>
+                    <span className="text-gray-600">{item}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Course Curriculum */}
+            <motion.div
+              className="bg-white rounded-xl shadow-lg p-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                📚 Course Curriculum
+              </h2>
+              <div className="space-y-4">
+                {curriculum.length > 0 ? (
+                  curriculum.map((section, index) => (
+                    <motion.div
+                      key={section.id}
+                      className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 transition cursor-pointer"
+                      whileHover={{ scale: 1.02 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 + index * 0.1 }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-lg">
+                            Section {section.id}: {section.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            ⏱️ {section.duration} • 🎥 {section.videoCount}{" "}
+                            videos
+                          </p>
+                        </div>
+                        <span className="text-2xl">▶️</span>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className="text-gray-600">
+                    Curriculum details coming soon
+                  </p>
+                )}
+              </div>
+            </motion.div>
           </div>
 
-          <div>
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Instructor */}
+            <motion.div
+              className="bg-white rounded-xl shadow-lg p-6"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 About the Instructor
               </h3>
               <div className="text-center mb-4">
-                <img
+                <motion.img
                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${course.instructor}`}
                   alt={course.instructor}
                   className="w-24 h-24 rounded-full mx-auto mb-4"
+                  whileHover={{ scale: 1.1 }}
                 />
                 <h4 className="text-lg font-bold text-gray-900">
                   {course.instructor}
                 </h4>
                 <p className="text-sm text-gray-600">Expert Instructor</p>
               </div>
-              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+              <motion.button
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                whileHover={{ scale: 1.05 }}
+              >
                 View Profile
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            {/* Rating */}
+            <motion.div
+              className="bg-white rounded-xl shadow-lg p-6"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Course Rating
               </h3>
@@ -216,41 +409,31 @@ export default function CourseDetail() {
                 <p className="text-3xl font-bold text-gray-900">
                   {course.rating}
                 </p>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   Based on {course.students.toLocaleString()} student reviews
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Course Details
-              </h3>
-              <ul className="space-y-4">
-                <li>
-                  <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-semibold text-gray-900">
-                    {course.category}
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm text-gray-600">Level</p>
-                  <p className="font-semibold text-gray-900">{course.level}</p>
-                </li>
-                <li>
-                  <p className="text-sm text-gray-600">Duration</p>
-                  <p className="font-semibold text-gray-900">
-                    {course.duration}
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm text-gray-600">Students Enrolled</p>
-                  <p className="font-semibold text-gray-900">
-                    {course.students.toLocaleString()}
-                  </p>
-                </li>
-              </ul>
-            </div>
+            {/* User Info */}
+            {user && (
+              <motion.div
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  👤 Your Info
+                </h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  <span className="font-semibold">Name:</span> {user.name}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">Email:</span> {user.email}
+                </p>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
